@@ -21,3 +21,4 @@
  - mort par manque de pv non fonxionelle
  - bordure de Tiles visibles par endroits
  - barre de vie non visible
+ - pas d'image de fond due à une refonte de la map 
