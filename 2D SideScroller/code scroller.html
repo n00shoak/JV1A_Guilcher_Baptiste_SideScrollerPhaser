@@ -13,6 +13,7 @@ src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
 var config = {
 type: Phaser.AUTO,
 width: 900, height: 900,
+input:{gamepad:true},
 
 physics: {
 default: 'arcade',
@@ -29,6 +30,7 @@ new Phaser.Game(config);
 var plateforms;
 var player;
 var cursors;
+var controllers = false;
 var jumpAmount = 2;
 var jumpLeft = jumpAmount;
 var cdJump = true;
@@ -67,6 +69,10 @@ var ventState = false;
 //                          FUNCTION CREATE
 //====================================================================
 function create(){
+  this.input.gamepad.once('connected', function (pad) {
+  controller = pad;
+  });
+
   // ===== chargement de la carte =====
   const carteDuNiveau = this.add.tilemap("carte");
 
@@ -221,11 +227,11 @@ function update(){
     this.cameras.main.setZoom(camZoom);
     }
 
-    if (cursors.left.isDown){ //si la touche gauche est appuyée
+    if (cursors.left.isDown || controllers.right.isDown){ //si la touche gauche est appuyée
     player.setVelocityX(-130 - dashStregnth); //alors vitesse négative en X
     player.anims.play('left', true); //et animation => gauche
     }
-    else if (cursors.right.isDown){ //sinon si la touche droite est appuyée
+    else if (cursors.right.isDown || controllers.right.isDown){ //sinon si la touche droite est appuyée
     player.setVelocityX(130 + dashStregnth); //alors vitesse positive en X
     player.anims.play('right', true); //et animation => droite
     }
@@ -239,7 +245,7 @@ function update(){
       jumpLeft = jumpAmount;
     }
 
-    if (cursors.up.isDown &&  jumpLeft > 0 && cdJump){
+    if ((cursors.up.isDown || controllers.up.isDown) &&  jumpLeft > 0 && cdJump){
       player.setVelocityY(-230); 
       cdJump = false;
       jumpLeft -= 1;
@@ -248,7 +254,7 @@ function update(){
     }
 
     // ===== dash =====
-    if (cursors.down.isDown && cdDash && canDash){
+    if ((cursors.down.isDown || controllers.up.isDown) && cdDash && canDash){
       dashStregnth = 200;
       player.body.setVelocityy = 0;
       cdDash = false;
@@ -267,19 +273,19 @@ function update(){
 
     player.body.allowGravity = false;
 
-    if(cursors.left.isDown){
+    if(cursors.left.isDown || controllers.left.isDown){
       player.setVelocityX(-150)
       player.anims.play('left',true)
     }
-    if (cursors.right.isDown){
+    if (cursors.right.isDown || controllers.right.isDown){
       player.setVelocityX(150)
       player.anims.play('right',true)
     }
-    if (cursors.up.isDown){
+    if (cursors.up.isDown || controllers.up.isDown){
       player.setVelocityY(-150)
       player.anims.play('right',true)
     }
-    if (cursors.down.isDown){
+    if (cursors.down.isDown || controllers.down.isDown){
       player.setVelocityY(150)
       player.anims.play('left',true)
     }
