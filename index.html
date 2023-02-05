@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><title>Mon 1er jeu Phaser</title>
+<script
+src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+<style type="text/css"> body { margin: 0; }</style>
+</head>
+<body>
+<script type="text/javascript">
+
+
+var config = {
+type: Phaser.AUTO,
+width: 900, height: 900,
+input:{gamepad:true},
+
+physics: {
+default: 'arcade',
+arcade: {
+gravity: { y: 500 },
+debug: false,
+}},
+
+scene: {preload: preload, create: create, update: update }
+};
+new Phaser.Game(config);
+
+// == var ==
+var plateforms;
+var player;
+var cursors;
+var controllers = false;
+var jumpAmount = 2;
+var jumpLeft = jumpAmount;
+var cdJump = true;
+var canDash = false;
+var dashStregnth = 0;
+var cdDash = true;
+var camZoom = 2;
+var ennemiCD = false;
+var pv = 3;
+var animationCD = false;
+//====================================================================
+//                         FUNCTION PRELOAD
+//====================================================================
+function preload(){
+  // chargement tuiles de jeu
+  this.load.image("Pallette", "tiled_map/MapSideScroller/palette.png");
+  this.load.image("animated", "tiled_map/MapSideScroller/animatedTiles.png");
+  this.load.image("wall", "tiled_map/MapSideScroller/Spritewall.png");
+
+  //chargement des sprites
+  this.load.image("null","tiled_map/MapSideScroller/spriteInvisible.png");
+  this.load.image("death","tiled_map/MapSideScroller/death.png");
+  this.load.image("dash","tiled_map/MapSideScroller/dash.png");
+  this.load.image("jump","tiled_map/MapSideScroller/jump.png");
+  this.load.image("drones","tiled_map/MapSideScroller/drones.png");
+
+  // chargement de la carte
+  this.load.tilemapTiledJSON("carte", "tiled_map/Map_Tiled.json")
+
+  this.load.spritesheet('perso','tiled_map/MapSideScroller/perso.png',
+    { frameWidth: 16, frameHeight: 16 });
+}
+
+var ventState = false;
+//====================================================================
+//                          FUNCTION CREATE
+//====================================================================
+function create(){
+  this.input.gamepad.once('connected', function (pad) {
+  controller = pad;
+  });
+
+  // ===== chargement de la carte =====
+  const carteDuNiveau = this.add.tilemap("carte");
+
+  // ===== chargement des pallettes =====
+  const tilesetA = carteDuNiveau.addTilesetImage(
+          "Tileset_A",
+          "Pallette",
+        ); 
+  const tilesetB = carteDuNiveau.addTilesetImage(
+          "Tileset_B",
+          "wall",
+        ); 
+  const tilesetC = carteDuNiveau.addTilesetImage(
+          "Tileset_C",
+          "animated",
+        ); 
+
+  // ===== chartgement des claques =====
+  // chargement du calque calque_4
+  const calque_D = carteDuNiveau.createLayer(
+          "Layer4",
+          tilesetB,
+        );
+
+  // chargement du calque calque_5
+  const calque_E = carteDuNiveau.createLayer(
+          "Layer 5",
+          tilesetB
+        );
+
+  // chargement du calque calque_3
+  const calque_C = carteDuNiveau.createLayer(
+          "ground/Layer3",
+          tilesetA
+        );
+
+  // chargement du calque calque_2
+  const calque_B = carteDuNiveau.createLayer(
+          "ground/Layer_2",
+          tilesetA
+        )
+  // chargement du calque calque_1
+  const calque_A = carteDuNiveau.createLayer(
+          "ground/Layer_1",
+          tilesetA
+        );
+
+// ===== object =====
+{
+ventIn = this.physics.add.group();
+                calque_ventIn = carteDuNiveau.getObjectLayer('ventIn');
+                calque_ventIn.objects.forEach( calque_ventIn => {
+                    const POventIn = ventIn.create( calque_ventIn.x + 16, calque_ventIn.y + 16, "null").body.setAllowGravity(false).setImmovable(true);
+                });
+
+ventOff = this.physics.add.group();
+                calque_ventOff = carteDuNiveau.getObjectLayer('ventOff');
+                calque_ventOff.objects.forEach( calque_ventOff => {
+                    const POventIn = ventOff.create( calque_ventOff.x + 16, calque_ventOff.y + 16, "null").body.setAllowGravity(false).setImmovable(true);
+                });
+
+death = this.physics.add.group();
+                calque_death = carteDuNiveau.getObjectLayer('death');
+                calque_death.objects.forEach( calque_death => {
+                    const POdeath = death.create( calque_death.x + 16, calque_death.y + 16, "death").body.setAllowGravity(false).setImmovable(true);
+                });
+
+powerUp = this.physics.add.group();
+                calque_powerUp = carteDuNiveau.getObjectLayer('powerUp');
+                calque_powerUp.objects.forEach( calque_powerUp => {
+                    const POdeath = powerUp.create( calque_powerUp.x + 16, calque_powerUp.y + 16, "dash").body.setAllowGravity(false).setImmovable(true);
+                  });
+
+jumpReset = this.physics.add.group();
+                calque_jumpReset = carteDuNiveau.getObjectLayer('jumpReset');
+                calque_jumpReset.objects.forEach( calque_jumpReset => {
+                    const POjumpReset = jumpReset.create( calque_jumpReset.x + 16, calque_jumpReset.y + 16, "jump").body.setAllowGravity(false).setImmovable(true);
+                  });                  
+
+mechant = this.physics.add.group();
+                calque_mechant = carteDuNiveau.getObjectLayer('ennemi/lesMECHANTS');
+                calque_mechant.objects.forEach( calque_mechant => {
+                    const POjumpReset = mechant.create( calque_mechant.x + 16, calque_mechant.y + 16, "drones").body.setAllowGravity(false).setImmovable(true);
+                  });                  
+}
+// ===== perso =====
+
+player = this.physics.add.sprite(100, 1500, 'perso');
+player.setCollideWorldBounds(true)
+this.physics.add.collider(player, calque_D);
+this.anims.create({
+key: 'left',
+frames: this.anims.generateFrameNumbers('perso', {start:0,end:3}),
+frameRate: 20,
+repeat: -1
+});
+this.anims.create({
+key: 'turn',
+frames: [ { key: 'perso', frame: 4 } ],
+frameRate: 20
+});
+this.anims.create({
+key: 'right',
+frames: this.anims.generateFrameNumbers('perso', {start:5,end:8}),
+frameRate: 20,
+repeat: -1
+});
+
+// definition de colision des plateformes
+calque_B.setCollisionByProperty({ estSolide: true });  
+calque_C.setCollisionByProperty({ ventON: true});
+
+// colision >> joueur / vent
+this.physics.add.overlap(player, ventIn, ventEnter, null, this)
+this.physics.add.overlap(player, ventOff, ventExit, null, this)
+
+// colision >> joueur / environement
+this.physics.add.overlap(player, death, Death, null, this)
+this.physics.add.overlap(player, powerUp, Dash, null, this)
+this.physics.add.overlap(player, jumpReset, moreJump, null, this)
+
+// colision >> joueur / ennemis
+this.physics.add.collider(player, mechant, damage, null, this)
+
+// colision >> joueur / plateforme
+this.physics.add.collider(player, calque_B); 
+this.physics.add.collider(player, calque_A); 
+
+// setup input 
+cursors = this.input.keyboard.createCursorKeys()
+
+
+// redimentionnement du monde avec les dimensions calculées via tiled
+this.physics.world.setBounds(0, 0, 3200, 3200);
+//  ajout du champs de la caméra de taille identique à celle du monde
+this.cameras.main.setBounds(0, 0, 3200, 3200);
+// ancrage de la caméra sur le joueur
+this.cameras.main.startFollow(player);  
+this.cameras.main.setZoom(2);
+}
+
+//====================================================================
+//                          FUNCTION UPDATE
+//====================================================================
+
+function update(){
+  //check vent state
+  if (ventState == false){
+    //smooth unzoom
+    if (camZoom > 2){
+    camZoom -= 0.1;
+    this.cameras.main.setZoom(camZoom);
+    }
+
+    if (cursors.left.isDown || controllers.right.isDown){ //si la touche gauche est appuyée
+    player.setVelocityX(-130 - dashStregnth); //alors vitesse négative en X
+    player.anims.play('left', true); //et animation => gauche
+    }
+    else if (cursors.right.isDown || controllers.right.isDown){ //sinon si la touche droite est appuyée
+    player.setVelocityX(130 + dashStregnth); //alors vitesse positive en X
+    player.anims.play('right', true); //et animation => droite
+    }
+    else{ // sinon
+    player.setVelocityX(0); //vitesse nulle
+    player.anims.play('turn'); //animation fait face caméra
+    }
+
+    // ===== saut =====
+    if(player.body.blocked.down){
+      jumpLeft = jumpAmount;
+    }
+
+    if ((cursors.up.isDown || controllers.up.isDown) &&  jumpLeft > 0 && cdJump){
+      player.setVelocityY(-230); 
+      cdJump = false;
+      jumpLeft -= 1;
+      console.log(jumpLeft)
+      setTimeout(() => {cdJump = true}, "250")
+    }
+
+    // ===== dash =====
+    if ((cursors.down.isDown || controllers.up.isDown) && cdDash && canDash){
+      dashStregnth = 200;
+      player.body.setVelocityy = 0;
+      cdDash = false;
+      player.body.allowGravity = false;
+      setTimeout(() => {dashStregnth = 0;player.body.allowGravity = true;}, "500")
+      setTimeout(() => {cdDash = true;}, "1000")
+    }
+    
+  }
+  else {
+    //smooth zoom
+    if (camZoom < 4){
+    camZoom += 0.1;
+    this.cameras.main.setZoom(camZoom);
+    }
+
+    player.body.allowGravity = false;
+
+    if(cursors.left.isDown || controllers.left.isDown){
+      player.setVelocityX(-150)
+      player.anims.play('left',true)
+    }
+    if (cursors.right.isDown || controllers.right.isDown){
+      player.setVelocityX(150)
+      player.anims.play('right',true)
+    }
+    if (cursors.up.isDown || controllers.up.isDown){
+      player.setVelocityY(-150)
+      player.anims.play('right',true)
+    }
+    if (cursors.down.isDown || controllers.down.isDown){
+      player.setVelocityY(150)
+      player.anims.play('left',true)
+    }
+    if(cursors.right.isUp && cursors.left.isUp && cursors.up.isUp && cursors.down.isUp){player.setVelocityX(0); player.setVelocityY(0); player.anims.play('turn');}
+  }
+
+  if (ennemiCD){mechant.setVelocityX(40);setTimeout(() => {ennemiCD = false;}, "4000")}
+  else{mechant.setVelocityX(-40);setTimeout(() => {ennemiCD = true;}, "4000")}
+
+  if (animationCD){jumpReset.setVelocityY(5);setTimeout(() => {animationCD = false;}, "500");console.log("A");}
+  else{jumpReset.setVelocityY(-5);setTimeout(() => {animationCD = true;}, "500");console.log("B");}
+
+  if (pv = 0)
+  {
+    console.log("game over")
+    this.physics.pause();
+    player.setTint(0xff0000);
+    player.anims.play('turn');
+  }
+
+}
+
+function ventEnter (){
+  ventState = true;
+}
+
+function ventExit(){
+  ventState = false;
+  player.body.allowGravity = true;
+}
+
+function Death(){
+  console.log("game over")
+  this.physics.pause();
+  player.setTint(0xff0000);
+  player.anims.play('turn');
+}
+
+function Dash(player,powerUp)
+{
+  canDash = true;
+  powerUp.disableBody(true,true);
+}
+
+function moreJump(){player.setVelocityY(-230);}
+
+function damage(player,mechant){
+  mechant.disableBody(true,true)
+  pv -= 1;
+}
+  </script>
+</body>
+</html>
