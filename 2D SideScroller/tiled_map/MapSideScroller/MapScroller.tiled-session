@@ -1,0 +1,44 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Map_Tiled.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "": {
+            "scaleInEditor": 1
+        },
+        "Map_Tiled.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": -130,
+                "y": 642.6666666666665
+            }
+        },
+        "Map_Tiled.tmx#Tileset_A": {
+            "scaleInDock": 1
+        },
+        "Map_Tiled.tmx#Tileset_B": {
+            "scaleInDock": 1
+        },
+        "Map_Tiled.tmx#Tileset_C": {
+            "scaleInDock": 1
+        }
+    },
+    "frame.defaultDuration": 200,
+    "last.imagePath": "F:/2D SideScroller/tiled_map/MapSideScroller",
+    "map.height": 50,
+    "map.lastUsedFormat": "tmx",
+    "map.width": 50,
+    "openFiles": [
+        "Map_Tiled.tmx"
+    ],
+    "project": "MapScroller.tiled-project",
+    "recentFiles": [
+        "Map_Tiled.tmx"
+    ],
+    "tileset.embedInMap": true
+}

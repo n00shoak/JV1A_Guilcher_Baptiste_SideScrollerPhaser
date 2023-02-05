@@ -1,0 +1,24 @@
+{ "columns":13,
+ "image":"palette.png",
+ "imageheight":320,
+ "imagewidth":416,
+ "margin":0,
+ "name":"Tileset_A",
+ "spacing":0,
+ "tilecount":130,
+ "tiledversion":"1.9.2",
+ "tileheight":32,
+ "tiles":[
+        {
+         "id":56,
+         "properties":[
+                {
+                 "name":"ventON",
+                 "type":"bool",
+                 "value":true
+                }]
+        }],
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.9"
+}
