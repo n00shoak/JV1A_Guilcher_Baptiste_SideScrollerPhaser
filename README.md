@@ -22,3 +22,7 @@
  - bordure de Tiles visibles par endroits
  - barre de vie non visible
  - pas d'image de fond due à une refonte de la map 
+
+
+
+il y as aussi dans le documents principale le nouveau logo du jeu et son ancienne version
